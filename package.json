@@ -1,0 +1,40 @@
+{
+  "name": "luckybox",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "bin": {
+    "vault": "./bin/run.js"
+  },
+  "oclif": {
+    "bin": "vault",
+    "commands": "./dist/src/commands"
+  },
+  "scripts": {
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "pnpm -s run clean && tsc -p tsconfig.build.json",
+    "build:watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "dev": "node ./bin/dev.js",
+    "vault": "pnpm -s run build && node ./bin/run.js",
+    "test": "pnpm -s run build && node dist/tests/run.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src tests --ext .ts",
+    "lint:fix": "pnpm run lint -- --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@oclif/core": "^4.11.1",
+    "dotenv": "^17.4.2",
+    "viem": "^2.48.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^25.6.0",
+    "eslint": "^10.3.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "8.59.0"
+  }
+}
