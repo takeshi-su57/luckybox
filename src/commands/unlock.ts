@@ -1,8 +1,5 @@
 import { Command, Flags } from "@oclif/core";
-import { getVaultConfig } from "../config/env";
-import { deriveDefaultWallets, formatPartialAddress } from "../wallet/derive";
-import { KEY_STANDARD_NAME } from "../wallet/standard";
-import { readPassphrase } from "../cli/shared";
+import { printDefaultWallets } from "./wallet-summary";
 
 export default class Unlock extends Command {
   static override summary = "Unlock deterministic keys for this session (no persistence).";
@@ -15,15 +12,10 @@ export default class Unlock extends Command {
 
   public override async run(): Promise<void> {
     const { flags } = await this.parse(Unlock);
-    const passphrase = await readPassphrase({ passphrase: flags.passphrase });
-    const wallets = deriveDefaultWallets(passphrase);
-    const config = getVaultConfig();
-
-    this.log("Keys unlocked for this session only.");
-    this.log(`Standard: ${KEY_STANDARD_NAME}`);
-    this.log(`Network: ${config.network}`);
-    for (const wallet of wallets) {
-      this.log(`${wallet.box}: ${formatPartialAddress(wallet.address)}`);
-    }
+    await printDefaultWallets({
+      command: this,
+      passphrase: flags.passphrase,
+      introLine: "Keys unlocked for this session only."
+    });
   }
 }

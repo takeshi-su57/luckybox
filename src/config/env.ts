@@ -2,10 +2,11 @@ import process from "node:process";
 import { config as loadDotEnv } from "dotenv";
 import { getAddress, isAddress, type Address, type Chain } from "viem";
 import { getChainByNetwork, parseSupportedNetwork, type SupportedNetwork } from "./chains";
+import { getKdfSalt } from "./kdf";
+export { DEFAULT_KDF_SALT } from "./kdf";
 
 loadDotEnv({ quiet: true });
 
-export const DEFAULT_KDF_SALT = "brainvault:v1:ethereum";
 const DEFAULT_NATIVE_TOKEN = "ETH";
 
 export type VaultConfig = {
@@ -31,7 +32,14 @@ export function parseErc20TokenMap(raw: string | undefined): Record<string, Addr
       continue;
     }
 
-    const [symbolRaw, addressRaw] = trimmed.split(":");
+    const parts = trimmed.split(":");
+    if (parts.length !== 2) {
+      throw new Error(
+        "VAULT_ERC20_TOKENS entries must use SYMBOL:ADDRESS format separated by commas."
+      );
+    }
+
+    const [symbolRaw, addressRaw] = parts;
     if (!symbolRaw || !addressRaw) {
       throw new Error(
         "VAULT_ERC20_TOKENS entries must use SYMBOL:ADDRESS format separated by commas."
@@ -40,6 +48,9 @@ export function parseErc20TokenMap(raw: string | undefined): Record<string, Addr
 
     const symbol = symbolRaw.trim().toUpperCase();
     const addressCandidate = addressRaw.trim();
+    if (Object.prototype.hasOwnProperty.call(mapping, symbol)) {
+      throw new Error(`Duplicate ERC20 symbol in VAULT_ERC20_TOKENS: ${symbol}`);
+    }
     if (!isAddress(addressCandidate, { strict: false })) {
       throw new Error(`Invalid ERC20 address for ${symbol}: ${addressCandidate}`);
     }
@@ -51,7 +62,7 @@ export function parseErc20TokenMap(raw: string | undefined): Record<string, Addr
 }
 
 export function getVaultConfig(): VaultConfig {
-  const kdfSalt = process.env.BRAIN_WALLET_SALT?.trim() || DEFAULT_KDF_SALT;
+  const kdfSalt = getKdfSalt();
   const network = parseSupportedNetwork(process.env.VAULT_NETWORK);
   const chain = getChainByNetwork(network);
   const nativeTokenSymbol =

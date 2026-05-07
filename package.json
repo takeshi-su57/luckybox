@@ -16,7 +16,9 @@
     "build:watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
     "dev": "node ./bin/dev.js",
     "vault": "pnpm -s run build && node ./bin/run.js",
-    "test": "pnpm -s run build && node dist/tests/run.js",
+    "test": "vitest run --pool=threads",
+    "test:watch": "vitest --pool=threads",
+    "test:coverage": "vitest run --pool=threads --coverage",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src tests --ext .ts",
     "lint:fix": "pnpm run lint -- --fix",
@@ -35,6 +37,7 @@
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.8.3",
     "typescript": "^6.0.3",
-    "typescript-eslint": "8.59.0"
+    "typescript-eslint": "8.59.0",
+    "vitest": "^4.1.5"
   }
 }

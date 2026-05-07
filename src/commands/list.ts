@@ -1,8 +1,5 @@
 import { Command, Flags } from "@oclif/core";
-import { getVaultConfig } from "../config/env";
-import { deriveDefaultWallets, formatPartialAddress } from "../wallet/derive";
-import { KEY_STANDARD_NAME } from "../wallet/standard";
-import { readPassphrase } from "../cli/shared";
+import { printDefaultWallets } from "./wallet-summary";
 
 export default class List extends Command {
   static override summary = "List box1 and box2 addresses (masked by default).";
@@ -18,14 +15,10 @@ export default class List extends Command {
 
   public override async run(): Promise<void> {
     const { flags } = await this.parse(List);
-    const passphrase = await readPassphrase({ passphrase: flags.passphrase });
-    const wallets = deriveDefaultWallets(passphrase);
-    const config = getVaultConfig();
-
-    this.log(`Standard: ${KEY_STANDARD_NAME}`);
-    this.log(`Network: ${config.network}`);
-    for (const wallet of wallets) {
-      this.log(`${wallet.box}: ${flags.show ? wallet.address : formatPartialAddress(wallet.address)}`);
-    }
+    await printDefaultWallets({
+      command: this,
+      passphrase: flags.passphrase,
+      showFullAddress: flags.show ?? false
+    });
   }
 }

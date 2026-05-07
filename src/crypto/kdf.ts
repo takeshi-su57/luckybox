@@ -1,7 +1,7 @@
 import { scryptSync } from "node:crypto";
-import { getVaultConfig } from "../config/env";
+import { DEFAULT_KDF_SALT, getKdfSalt } from "../config/kdf";
 
-export const BRAIN_WALLET_SALT = "brainvault:v1:ethereum";
+export const BRAIN_WALLET_SALT = DEFAULT_KDF_SALT;
 
 const SEED_SIZE = 32;
 const SCRYPT_OPTIONS = {
@@ -26,7 +26,7 @@ export function normalizePassphrase(passphrase: string): string {
 
 export function deriveSeed(passphrase: string): Uint8Array {
   const normalized = normalizePassphrase(passphrase);
-  const configuredSalt = getVaultConfig().kdfSalt;
+  const configuredSalt = getKdfSalt();
   const seed = scryptSync(normalized, configuredSalt, SEED_SIZE, SCRYPT_OPTIONS);
   return new Uint8Array(seed);
 }
