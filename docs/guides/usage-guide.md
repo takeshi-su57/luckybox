@@ -7,8 +7,8 @@ Given the same passphrase and salt, it always derives the same addresses.
 
 ## Core Environment Variables
 
-- `BRAIN_WALLET_SALT` (required)
-- `BRAIN_PASSPHRASE` (optional; otherwise prompted)
+- `BRAIN_WALLET_SALT` (optional override; otherwise stored in `config.json` and prompted on first use)
+- `BRAIN_PASSPHRASE` (optional override for tests; otherwise prompted)
 
 Optional advanced env overrides:
 
@@ -101,6 +101,14 @@ The app saves reusable non-sensitive setup into `config.json`, scoped by network
 ```
 
 Sensitive values are never persisted there.
+
+Global wallet salt is persisted under `_global.walletSalt`. Manage it via:
+
+```bash
+pnpm run luckybox -- salt get
+pnpm run luckybox -- salt set
+pnpm run luckybox -- salt clear
+```
 
 ## Safety Behavior
 

@@ -2,8 +2,10 @@ import { Args, Command, Flags } from "@oclif/core";
 import { createPublicClient, erc20Abi, formatEther, formatUnits, http, type Address } from "viem";
 import { resolveRpcUrl } from "../config/rpc";
 import { getVaultConfig, resolveErc20Address } from "../config/env";
-import { readPassphrase } from "../io/prompt";
-import { deriveWalletByBox } from "../wallet/derive";
+import { resolvePassphrase } from "../io/passphrase";
+import { deriveWalletByBoxWithSalt } from "../wallet/derive";
+import { resolveWalletSalt } from "../config/wallet-salt";
+import { promptLine } from "../io/prompt";
 
 async function readErc20Balance(
   publicClient: ReturnType<typeof createPublicClient>,
@@ -39,14 +41,27 @@ export async function runBalanceCommand(options: {
   box: string;
   token?: string;
   passphrase?: string;
+  allowUnsafePassphrase?: boolean;
+  passphraseStdin?: boolean;
+  passphraseFile?: string;
+  quiet?: boolean;
   rpcUrl?: string;
 }): Promise<void> {
   if (!options.box) {
     throw new Error("Missing wallet alias. Usage: luckybox balance box1 [--rpc-url <url>]");
   }
 
-  const passphrase = await readPassphrase({ passphrase: options.passphrase });
-  const wallet = deriveWalletByBox(passphrase, options.box);
+  const passphrase = (
+    await resolvePassphrase({
+      passphraseArg: options.passphrase,
+      allowUnsafePassphrase: options.allowUnsafePassphrase,
+      passphraseStdin: options.passphraseStdin,
+      passphraseFile: options.passphraseFile,
+      quiet: options.quiet
+    })
+  ).passphrase;
+  const { salt } = await resolveWalletSalt({ prompt: promptLine });
+  const wallet = deriveWalletByBoxWithSalt(passphrase, salt, options.box);
   const config = getVaultConfig();
   const publicClient = createPublicClient({
     chain: config.chain,
@@ -88,8 +103,20 @@ export default class Balance extends Command {
   };
 
   static override flags = {
+    "passphrase-stdin": Flags.boolean({
+      description: "Read passphrase from stdin (recommended for automation/tests)."
+    }),
+    "passphrase-file": Flags.string({
+      description: "Read passphrase from file (recommended for automation/tests)."
+    }),
+    "allow-unsafe-passphrase": Flags.boolean({
+      description: "Allow unsafe passphrase sources (env/--passphrase). Intended for tests."
+    }),
     passphrase: Flags.string({
-      description: "Passphrase (or use BRAIN_PASSPHRASE env var)."
+      description: "UNSAFE: passphrase via CLI arg (requires --allow-unsafe-passphrase)."
+    }),
+    quiet: Flags.boolean({
+      description: "Suppress warnings."
     }),
     "rpc-url": Flags.string({
       description: "RPC endpoint."
@@ -103,7 +130,11 @@ export default class Balance extends Command {
     const { args, flags } = await this.parse(Balance);
     await runBalanceCommand({
       box: args.box,
+      allowUnsafePassphrase: flags["allow-unsafe-passphrase"],
       passphrase: flags.passphrase,
+      passphraseFile: flags["passphrase-file"],
+      passphraseStdin: flags["passphrase-stdin"],
+      quiet: flags.quiet,
       rpcUrl: flags["rpc-url"],
       token: flags.token
     });

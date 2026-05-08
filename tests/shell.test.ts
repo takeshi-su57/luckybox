@@ -73,7 +73,8 @@ vi.mock("../src/io/clipboard", () => ({
   copyToClipboard: copyMock
 }));
 vi.mock("../src/wallet/derive", () => ({
-  deriveWalletByBox: deriveMock,
+  deriveWalletByBoxWithSalt: (_passphrase: string, _salt: string, box: string) =>
+    deriveMock(_passphrase, box),
   formatPartialAddress: (v: string) => `${v.slice(0, 5)}...${v.slice(-5)}`,
   indexToBox: indexToBoxMock
 }));
@@ -134,6 +135,7 @@ describe("interactive shell", () => {
         promptLabels.push(prompt);
         return prompts[i++] ?? "exit";
       },
+      resolveWalletSalt: async () => "test:salt",
       log: (line) => logs.push(line)
     });
 
@@ -169,6 +171,7 @@ describe("interactive shell", () => {
     await executeShellSession({
       readPassphrase,
       promptLine: async () => prompts[i++] ?? "exit",
+      resolveWalletSalt: async () => "test:salt",
       log: (line) => logs.push(line)
     });
 
@@ -201,6 +204,7 @@ describe("interactive shell", () => {
     await executeShellSession({
       readPassphrase: async () => "secret",
       promptLine: async () => prompts[i++] ?? "exit",
+      resolveWalletSalt: async () => "test:salt",
       log: () => undefined
     });
 
@@ -222,6 +226,7 @@ describe("interactive shell", () => {
     await executeShellSession({
       readPassphrase: async () => "secret",
       promptLine: async () => prompts[i++] ?? "exit",
+      resolveWalletSalt: async () => "test:salt",
       log: () => undefined
     });
 

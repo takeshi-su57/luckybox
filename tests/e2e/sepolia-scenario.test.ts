@@ -14,7 +14,7 @@ import { sepolia } from "viem/chains";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import process from "node:process";
 import { runSendCommand } from "../../src/commands/send";
-import { deriveWalletByBox } from "../../src/wallet/derive";
+import { deriveWalletByBoxWithSalt } from "../../src/wallet/derive";
 import { resolveErc20Address } from "../../src/config/env";
 import {
   getTestTokenSymbol,
@@ -319,9 +319,10 @@ maybeDescribe("Sepolia full scenario e2e", () => {
       transport: http(rpcUrl)
     });
 
-    const wallet0 = deriveWalletByBox(passphrase, "box1");
-    const wallet1 = deriveWalletByBox(passphrase, "box2");
-    const wallet2 = deriveWalletByBox(passphrase, "box3");
+    const salt = process.env.BRAIN_WALLET_SALT ?? "brainvault:v1:ethereum";
+    const wallet0 = deriveWalletByBoxWithSalt(passphrase, salt, "box1");
+    const wallet1 = deriveWalletByBoxWithSalt(passphrase, salt, "box2");
+    const wallet2 = deriveWalletByBoxWithSalt(passphrase, salt, "box3");
 
     const decimals = await publicClient.readContract({
       address: tokenAddress,

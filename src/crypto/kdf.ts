@@ -1,7 +1,4 @@
 import { scryptSync } from "node:crypto";
-import { DEFAULT_KDF_SALT, getKdfSalt } from "../config/kdf";
-
-export const BRAIN_WALLET_SALT = DEFAULT_KDF_SALT;
 
 const SEED_SIZE = 32;
 const SCRYPT_OPTIONS = {
@@ -24,9 +21,15 @@ export function normalizePassphrase(passphrase: string): string {
   return normalized;
 }
 
-export function deriveSeed(passphrase: string): Uint8Array {
+export function deriveSeed(passphrase: string, walletSalt: string): Uint8Array {
   const normalized = normalizePassphrase(passphrase);
-  const configuredSalt = getKdfSalt();
-  const seed = scryptSync(normalized, configuredSalt, SEED_SIZE, SCRYPT_OPTIONS);
+  if (typeof walletSalt !== "string") {
+    throw new TypeError("Wallet salt must be a string.");
+  }
+  const trimmedSalt = walletSalt.trim();
+  if (trimmedSalt.length === 0) {
+    throw new Error("Wallet salt cannot be blank.");
+  }
+  const seed = scryptSync(normalized, trimmedSalt, SEED_SIZE, SCRYPT_OPTIONS);
   return new Uint8Array(seed);
 }

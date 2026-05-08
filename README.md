@@ -57,6 +57,12 @@ Loop commands:
 - `help`
 - `exit`
 
+Passphrase input notes:
+
+- Default is a hidden prompt (fails closed if hidden prompt is unavailable).
+- For automation/tests prefer `--passphrase-stdin` or `--passphrase-file`.
+- `--passphrase` and `BRAIN_PASSPHRASE` are treated as unsafe and require `--allow-unsafe-passphrase`.
+
 ## Local Config Persistence
 
 Non-sensitive session helpers are persisted in `config.json` by network:

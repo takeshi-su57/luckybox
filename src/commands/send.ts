@@ -2,8 +2,10 @@ import { Args, Command, Flags } from "@oclif/core";
 import { createPublicClient, formatGwei, http } from "viem";
 import { getVaultConfig } from "../config/env";
 import { resolveRpcUrl } from "../config/rpc";
-import { promptLine, readPassphrase } from "../io/prompt";
-import { deriveWalletByBox, formatPartialAddress } from "../wallet/derive";
+import { promptLine } from "../io/prompt";
+import { resolvePassphrase } from "../io/passphrase";
+import { deriveWalletByBoxWithSalt, formatPartialAddress } from "../wallet/derive";
+import { resolveWalletSalt } from "../config/wallet-salt";
 import { broadcastTransfer } from "../wallet/tx/broadcast";
 import { getFeePreview } from "../wallet/tx/fee-strategy";
 import { parseRecipientAddress, prepareTransfer } from "../wallet/tx/prepare-transfer";
@@ -14,6 +16,10 @@ export async function runSendCommand(options: {
   amount: string;
   token?: string;
   passphrase?: string;
+  allowUnsafePassphrase?: boolean;
+  passphraseStdin?: boolean;
+  passphraseFile?: string;
+  quiet?: boolean;
   rpcUrl?: string;
 }): Promise<void> {
   if (!options.box) {
@@ -38,8 +44,17 @@ export async function runSendCommand(options: {
   const to = parseRecipientAddress(options.to);
   const amountInput = normalizedAmount;
   const tokenSelector = options.token;
-  const passphrase = await readPassphrase({ passphrase: options.passphrase });
-  const wallet = deriveWalletByBox(passphrase, options.box);
+  const passphrase = (
+    await resolvePassphrase({
+      passphraseArg: options.passphrase,
+      allowUnsafePassphrase: options.allowUnsafePassphrase,
+      passphraseStdin: options.passphraseStdin,
+      passphraseFile: options.passphraseFile,
+      quiet: options.quiet
+    })
+  ).passphrase;
+  const { salt } = await resolveWalletSalt({ prompt: promptLine });
+  const wallet = deriveWalletByBoxWithSalt(passphrase, salt, options.box);
   const config = getVaultConfig();
   const rpcUrl = resolveRpcUrl(options.rpcUrl);
 
@@ -131,8 +146,20 @@ export default class Send extends Command {
       required: true,
       description: "Amount to send."
     }),
+    "passphrase-stdin": Flags.boolean({
+      description: "Read passphrase from stdin (recommended for automation/tests)."
+    }),
+    "passphrase-file": Flags.string({
+      description: "Read passphrase from file (recommended for automation/tests)."
+    }),
+    "allow-unsafe-passphrase": Flags.boolean({
+      description: "Allow unsafe passphrase sources (env/--passphrase). Intended for tests."
+    }),
     passphrase: Flags.string({
-      description: "Passphrase (or use BRAIN_PASSPHRASE env var)."
+      description: "UNSAFE: passphrase via CLI arg (requires --allow-unsafe-passphrase)."
+    }),
+    quiet: Flags.boolean({
+      description: "Suppress warnings."
     }),
     "rpc-url": Flags.string({
       description: "RPC endpoint."
@@ -150,8 +177,12 @@ export default class Send extends Command {
     const { args, flags } = await this.parse(Send);
     await runSendCommand({
       amount: flags.amount,
+      allowUnsafePassphrase: flags["allow-unsafe-passphrase"],
       box: args.box,
       passphrase: flags.passphrase,
+      passphraseFile: flags["passphrase-file"],
+      passphraseStdin: flags["passphrase-stdin"],
+      quiet: flags.quiet,
       rpcUrl: flags["rpc-url"],
       to: flags.to,
       token: flags.token

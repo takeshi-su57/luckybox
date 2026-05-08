@@ -21,7 +21,9 @@ export async function promptHidden(prompt: string): Promise<string> {
     !process.stdout.isTTY ||
     typeof process.stdin.setRawMode !== "function"
   ) {
-    return await promptLine(prompt);
+    throw new Error(
+      "Hidden prompt unavailable (stdin/stdout not TTY). Use --passphrase-stdin or --passphrase-file, or allow unsafe inputs for tests."
+    );
   }
 
   process.stdout.write(prompt);

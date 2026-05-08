@@ -9,17 +9,30 @@ export type StoredToken = {
   decimals: string;
 };
 
+export type GlobalLocalConfig = {
+  walletSalt?: string;
+};
+
 export type NetworkLocalConfig = {
   rpcs: string[];
   tokens: StoredToken[];
 };
 
-export type LocalConfigFile = Record<string, NetworkLocalConfig>;
+export type LocalConfigFile = Record<string, NetworkLocalConfig> & { _global?: GlobalLocalConfig };
 
 const CONFIG_PATH = path.resolve(process.cwd(), "config.json");
 
 function emptyNetworkConfig(): NetworkLocalConfig {
   return { rpcs: [], tokens: [] };
+}
+
+function sanitizeGlobalConfig(raw: unknown): GlobalLocalConfig | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const candidate = raw as Partial<GlobalLocalConfig>;
+  if (typeof candidate.walletSalt !== "string") return undefined;
+  const trimmed = candidate.walletSalt.trim();
+  if (trimmed.length === 0) return undefined;
+  return { walletSalt: trimmed };
 }
 
 function sanitizeNetworkConfig(raw: unknown): NetworkLocalConfig {
@@ -60,6 +73,11 @@ export async function loadLocalConfig(): Promise<LocalConfigFile> {
     if (!parsed || typeof parsed !== "object") return {};
     const out: LocalConfigFile = {};
     for (const [network, value] of Object.entries(parsed as Record<string, unknown>)) {
+      if (network === "_global") {
+        const global = sanitizeGlobalConfig(value);
+        if (global) out._global = global;
+        continue;
+      }
       out[network] = sanitizeNetworkConfig(value);
     }
     return out;
@@ -80,6 +98,30 @@ export async function getNetworkLocalConfig(
 ): Promise<NetworkLocalConfig> {
   const file = await loadLocalConfig();
   return file[network] ? sanitizeNetworkConfig(file[network]) : emptyNetworkConfig();
+}
+
+export async function getGlobalWalletSalt(): Promise<string | undefined> {
+  const file = await loadLocalConfig();
+  return file._global?.walletSalt;
+}
+
+export async function setGlobalWalletSalt(value: string): Promise<void> {
+  const trimmed = value.trim();
+  if (trimmed.length === 0) throw new Error("Wallet salt cannot be blank.");
+  const file = await loadLocalConfig();
+  file._global = { ...(file._global ?? {}), walletSalt: trimmed };
+  await saveLocalConfig(file);
+}
+
+export async function clearGlobalWalletSalt(): Promise<void> {
+  const file = await loadLocalConfig();
+  if (file._global) {
+    delete file._global.walletSalt;
+    if (Object.keys(file._global).length === 0) {
+      delete file._global;
+    }
+    await saveLocalConfig(file);
+  }
 }
 
 async function updateNetworkConfig(

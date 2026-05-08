@@ -15,9 +15,9 @@ import { deriveAddress, getDerivationPath } from "../src/crypto/hd";
 import { resolveRpcUrl } from "../src/config/rpc";
 import {
   boxToIndex,
-  deriveDefaultWallets,
+  deriveDefaultWalletsWithSalt,
   deriveWallet,
-  deriveWalletByBox,
+  deriveWalletByBoxWithSalt,
   formatPartialAddress,
   indexToBox
 } from "../src/wallet/derive";
@@ -106,21 +106,23 @@ describe("deterministic key and CLI behavior", () => {
 
   it("deriveSeed is deterministic", () => {
     process.env.BRAIN_WALLET_SALT = "test:salt:v1";
-    const first = deriveSeed("correct horse battery staple");
-    const second = deriveSeed("correct horse battery staple");
+    const first = deriveSeed("correct horse battery staple", process.env.BRAIN_WALLET_SALT);
+    const second = deriveSeed("correct horse battery staple", process.env.BRAIN_WALLET_SALT);
     expect(toHex(first)).toBe(toHex(second));
   });
 
   it("deriveSeed uses NFKD normalization", () => {
     process.env.BRAIN_WALLET_SALT = "test:salt:v1";
-    expect(toHex(deriveSeed("caf\u00E9"))).toBe(toHex(deriveSeed("cafe\u0301")));
+    expect(toHex(deriveSeed("caf\u00E9", process.env.BRAIN_WALLET_SALT))).toBe(
+      toHex(deriveSeed("cafe\u0301", process.env.BRAIN_WALLET_SALT))
+    );
   });
 
   it("deriveSeed changes when salt changes", () => {
     process.env.BRAIN_WALLET_SALT = "salt:one";
-    const one = deriveSeed("same passphrase");
+    const one = deriveSeed("same passphrase", process.env.BRAIN_WALLET_SALT);
     process.env.BRAIN_WALLET_SALT = "salt:two";
-    const two = deriveSeed("same passphrase");
+    const two = deriveSeed("same passphrase", process.env.BRAIN_WALLET_SALT);
     expect(toHex(one)).not.toBe(toHex(two));
   });
 
@@ -131,7 +133,7 @@ describe("deterministic key and CLI behavior", () => {
 
   it("deriveAddress is deterministic and index-sensitive", () => {
     process.env.BRAIN_WALLET_SALT = "wallet:test:salt";
-    const seed = deriveSeed("wallet passphrase");
+    const seed = deriveSeed("wallet passphrase", process.env.BRAIN_WALLET_SALT);
     const a0 = deriveAddress(seed, 0);
     const a0Again = deriveAddress(seed, 0);
     const a1 = deriveAddress(seed, 1);
@@ -146,17 +148,33 @@ describe("deterministic key and CLI behavior", () => {
     expect(indexToBox(0)).toBe("box1");
     expect(indexToBox(8)).toBe("box9");
 
-    const defaults = deriveDefaultWallets("unit passphrase");
-    const box1 = deriveWalletByBox("unit passphrase", "box1");
-    const box2 = deriveWalletByBox("unit passphrase", "box2");
+    const defaults = deriveDefaultWalletsWithSalt("unit passphrase", process.env.BRAIN_WALLET_SALT);
+    const box1 = deriveWalletByBoxWithSalt(
+      "unit passphrase",
+      process.env.BRAIN_WALLET_SALT,
+      "box1"
+    );
+    const box2 = deriveWalletByBoxWithSalt(
+      "unit passphrase",
+      process.env.BRAIN_WALLET_SALT,
+      "box2"
+    );
     expect(defaults[0]?.address).toBe(box1.address);
     expect(defaults[1]?.address).toBe(box2.address);
   });
 
   it("reference vectors remain stable for deterministic key standard v1", () => {
     process.env.BRAIN_WALLET_SALT = "brainvault:v1:ethereum";
-    const box1 = deriveWallet("correct horse battery staple", 0).address;
-    const box2 = deriveWallet("correct horse battery staple", 1).address;
+    const box1 = deriveWallet(
+      "correct horse battery staple",
+      process.env.BRAIN_WALLET_SALT,
+      0
+    ).address;
+    const box2 = deriveWallet(
+      "correct horse battery staple",
+      process.env.BRAIN_WALLET_SALT,
+      1
+    ).address;
     expect(box1).toBe("0xf38D74C177A28c156F169d6D174b6a9EFA6A53A9");
     expect(box2).toBe("0x7094E2253d32Cbb37DdcB26d85F4Af843193Cf50");
   });
@@ -174,7 +192,12 @@ describe("deterministic key and CLI behavior", () => {
     };
 
     try {
-      await runAddressCommand({ box: "box1", passphrase: "unit test passphrase" });
+      await runAddressCommand({
+        box: "box1",
+        passphrase: "unit test passphrase",
+        allowUnsafePassphrase: true,
+        quiet: true
+      });
     } finally {
       console.log = originalLog;
     }
@@ -201,7 +224,9 @@ describe("deterministic key and CLI behavior", () => {
         box: "",
         to: "0x0000000000000000000000000000000000000001",
         amount: "1",
-        passphrase: "unit test passphrase"
+        passphrase: "unit test passphrase",
+        allowUnsafePassphrase: true,
+        quiet: true
       })
     ).rejects.toThrow(
       "Missing wallet alias. Usage: luckybox send box1 --to <address> --amount <value> [--token <symbol|address>] [--rpc-url <url>]"
@@ -214,7 +239,9 @@ describe("deterministic key and CLI behavior", () => {
         box: "box1",
         to: "0x0000000000000000000000000000000000000001",
         amount: "",
-        passphrase: "unit test passphrase"
+        passphrase: "unit test passphrase",
+        allowUnsafePassphrase: true,
+        quiet: true
       })
     ).rejects.toThrow(/Missing required option "--amount"/);
   });
@@ -284,7 +311,7 @@ describe("deterministic key and CLI behavior", () => {
   it("deriveSeed remains available with invalid VAULT_NETWORK", () => {
     process.env.BRAIN_WALLET_SALT = "test:salt:v2";
     process.env.VAULT_NETWORK = "invalid-network";
-    const seed = deriveSeed("seed test");
+    const seed = deriveSeed("seed test", process.env.BRAIN_WALLET_SALT);
     expect(seed.length).toBe(32);
   });
 });

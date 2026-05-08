@@ -11,12 +11,13 @@ import {
 } from "../config/local-config";
 import { resolveRpcUrl } from "../config/rpc";
 import { copyToClipboard } from "../io/clipboard";
-import { deriveWalletByBox, formatPartialAddress, indexToBox } from "../wallet/derive";
+import { deriveWalletByBoxWithSalt, formatPartialAddress, indexToBox } from "../wallet/derive";
 import { runSendCommand } from "../commands/send";
 
 export type ShellDeps = {
   promptLine: (prompt: string) => Promise<string>;
   readPassphrase: (options?: { passphrase?: string; confirm?: boolean }) => Promise<string>;
+  resolveWalletSalt: () => Promise<string>;
   log: (line: string) => void;
 };
 
@@ -26,6 +27,7 @@ type SessionToken =
 
 type SessionContext = {
   passphrase: string;
+  walletSalt: string;
   network: SupportedNetwork;
   rpcUrl: string;
   nativeSymbol: string;
@@ -204,6 +206,7 @@ async function chooseToken(
 
 async function createSessionContext(deps: ShellDeps): Promise<SessionContext> {
   const passphrase = await deps.readPassphrase({ confirm: false });
+  const walletSalt = await deps.resolveWalletSalt();
   const network = await chooseNetwork(deps);
   process.env.VAULT_NETWORK = network;
   const localConfig = await getNetworkLocalConfig(network);
@@ -218,7 +221,7 @@ async function createSessionContext(deps: ShellDeps): Promise<SessionContext> {
     nativeSymbol,
     localConfig.tokens
   );
-  return { passphrase, network, rpcUrl, nativeSymbol, token, savedRpcs, savedTokens };
+  return { passphrase, walletSalt, network, rpcUrl, nativeSymbol, token, savedRpcs, savedTokens };
 }
 
 async function runListCommand(
@@ -232,7 +235,7 @@ async function runListCommand(
 
   for (let index = from; index <= to; index++) {
     const box = indexToBox(index - 1);
-    const wallet = deriveWalletByBox(context.passphrase, box);
+    const wallet = deriveWalletByBoxWithSalt(context.passphrase, context.walletSalt, box);
     const nativeRaw = await publicClient.getBalance({ address: wallet.address });
     const nativeBalance = formatEther(nativeRaw);
 
@@ -278,7 +281,7 @@ async function runPickCommand(
     );
   }
 
-  const wallet = deriveWalletByBox(context.passphrase, box);
+  const wallet = deriveWalletByBoxWithSalt(context.passphrase, context.walletSalt, box);
   if (copy) {
     const copied = copyToClipboard(wallet.address);
     if (!copied) throw new Error("Failed to copy address to clipboard on this system.");
