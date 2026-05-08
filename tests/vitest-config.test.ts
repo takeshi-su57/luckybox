@@ -32,12 +32,19 @@ describe("vitest config", () => {
     };
 
     expect(packageJson.private).toBe(false);
-    expect(packageJson.version).toBe("0.1.1");
+    expect(packageJson.version ?? "").toMatch(
+      /^\d+\.\d+\.\d+(?:-[0-9A-Za-z-.]+)?(?:\+[0-9A-Za-z-.]+)?$/,
+    );
+    expect(packageJson.version).not.toBe("0.1.0");
     expect(packageJson.bin).toEqual({ luckybox: "./bin/run.js" });
     expect(packageJson.oclif?.bin).toBe("luckybox");
     expect(packageJson.scripts?.luckybox ?? "").toContain("node ./bin/run.js");
     expect(packageJson.scripts?.vault).toBeUndefined();
     expect(packageJson.scripts?.changeset).toBe("changeset");
+    expect(packageJson.scripts?.["release:check"] ?? "").toContain("pnpm run typecheck");
+    expect(packageJson.scripts?.["release:check"] ?? "").toContain("pnpm run lint");
+    expect(packageJson.scripts?.["release:check"] ?? "").toContain("pnpm run format:check");
+    expect(packageJson.scripts?.["release:check"] ?? "").toContain("pnpm run test");
     expect(packageJson.scripts?.["release:check"] ?? "").toContain("pnpm run build");
     expect(packageJson.scripts?.["release:check"] ?? "").toContain("pnpm pack --dry-run");
     expect(packageJson.scripts?.["release:publish"] ?? "").toContain("changeset publish");
