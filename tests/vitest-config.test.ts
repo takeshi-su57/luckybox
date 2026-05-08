@@ -37,6 +37,11 @@ describe("vitest config", () => {
     expect(packageJson.oclif?.bin).toBe("luckybox");
     expect(packageJson.scripts?.luckybox ?? "").toContain("node ./bin/run.js");
     expect(packageJson.scripts?.vault).toBeUndefined();
+    expect(packageJson.scripts?.changeset).toBe("changeset");
+    expect(packageJson.scripts?.["release:check"] ?? "").toContain("pnpm run build");
+    expect(packageJson.scripts?.["release:check"] ?? "").toContain("pnpm pack --dry-run");
+    expect(packageJson.scripts?.["release:publish"] ?? "").toContain("changeset publish");
+    expect(packageJson.scripts?.prepublishOnly).toBe("pnpm run release:check");
     expect(packageJson.files).toEqual(["bin", "dist", "README.md"]);
   });
 });
