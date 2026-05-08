@@ -8,19 +8,24 @@ describe("vitest config", () => {
     const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8")) as {
       scripts?: Record<string, string>;
     };
-    expect(packageJson.scripts?.test ?? "").toContain(" tests");
-    expect(packageJson.scripts?.["test:watch"] ?? "").toContain(" tests");
-    expect(packageJson.scripts?.["test:coverage"] ?? "").toContain(" tests");
-    expect(packageJson.scripts?.["test:integration"] ?? "").toContain(" tests/integration");
-    expect(packageJson.scripts?.["test:e2e"] ?? "").toContain(" tests/e2e");
-    expect(packageJson.scripts?.test ?? "").toContain("--exclude dist/**");
-    expect(packageJson.scripts?.["test:watch"] ?? "").toContain("--exclude dist/**");
-    expect(packageJson.scripts?.["test:coverage"] ?? "").toContain("--exclude dist/**");
-    expect(packageJson.scripts?.test ?? "").toContain("--exclude tests/e2e/**");
-    expect(packageJson.scripts?.["test:watch"] ?? "").toContain("--exclude tests/e2e/**");
-    expect(packageJson.scripts?.["test:coverage"] ?? "").toContain("--exclude tests/e2e/**");
-    expect(packageJson.scripts?.["test:integration"] ?? "").toContain("--exclude dist/**");
-    expect(packageJson.scripts?.["test:e2e"] ?? "").toContain("--exclude dist/**");
+    expect(packageJson.scripts?.test ?? "").toContain("--dir tests");
+    expect(packageJson.scripts?.["test:watch"] ?? "").toContain("--dir tests");
+    expect(packageJson.scripts?.["test:coverage"] ?? "").toContain("--dir tests");
+    expect(packageJson.scripts?.["test:integration"] ?? "").toContain("--dir tests/integration");
+    expect(packageJson.scripts?.["test:e2e"] ?? "").toContain("--dir tests/e2e");
+    expect(packageJson.scripts?.test ?? "").toContain("e2e/**");
+    expect(packageJson.scripts?.["test:watch"] ?? "").toContain("e2e/**");
+    expect(packageJson.scripts?.["test:coverage"] ?? "").toContain("e2e/**");
+  });
+
+  it("prevents emitting compiled test files into dist", () => {
+    const tsconfigBuildPath = path.resolve(process.cwd(), "tsconfig.build.json");
+    const tsconfigBuild = JSON.parse(readFileSync(tsconfigBuildPath, "utf8")) as {
+      include?: string[];
+    };
+
+    expect(tsconfigBuild.include).toEqual(["src/**/*.ts"]);
+    expect(tsconfigBuild.include?.some((entry) => entry.includes("tests")) ?? false).toBe(false);
   });
 
   it("enforces publish metadata and luckybox cli entrypoint contract", () => {
