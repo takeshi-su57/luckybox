@@ -20,7 +20,7 @@ Optional advanced env overrides:
 Start shell:
 
 ```bash
-pnpm run vault -- shell
+pnpm run luckybox -- shell
 ```
 
 Setup inside shell:
@@ -48,43 +48,43 @@ exit
 Show help:
 
 ```bash
-pnpm run vault -- --help
+pnpm run luckybox -- --help
 ```
 
 Show one address:
 
 ```bash
-pnpm run vault -- address box1 --passphrase "your passphrase"
+pnpm run luckybox -- address box1 --passphrase "your passphrase"
 ```
 
 List default wallets:
 
 ```bash
-pnpm run vault -- list --passphrase "your passphrase"
+pnpm run luckybox -- list --passphrase "your passphrase"
 ```
 
 Check native balance:
 
 ```bash
-pnpm run vault -- balance box1 --passphrase "your passphrase"
+pnpm run luckybox -- balance box1 --passphrase "your passphrase"
 ```
 
 Check ERC20 balance:
 
 ```bash
-pnpm run vault -- balance box1 --token USDT --passphrase "your passphrase"
+pnpm run luckybox -- balance box1 --token USDT --passphrase "your passphrase"
 ```
 
 Send native token:
 
 ```bash
-pnpm run vault -- send box1 --to 0xRecipient --amount 0.001 --passphrase "your passphrase"
+pnpm run luckybox -- send box1 --to 0xRecipient --amount 0.001 --passphrase "your passphrase"
 ```
 
 Send ERC20:
 
 ```bash
-pnpm run vault -- send box1 --to 0xRecipient --token USDT --amount 1 --passphrase "your passphrase"
+pnpm run luckybox -- send box1 --to 0xRecipient --token USDT --amount 1 --passphrase "your passphrase"
 ```
 
 ## Persistent Local Config

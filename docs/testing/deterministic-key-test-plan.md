@@ -78,8 +78,8 @@ pnpm test
 2. Run:
 
 ```bash
-pnpm run vault -- list --passphrase "my passphrase"
-pnpm run vault -- list --passphrase "my passphrase"
+pnpm run luckybox -- list --passphrase "my passphrase"
+pnpm run luckybox -- list --passphrase "my passphrase"
 ```
 
 Expected:
@@ -114,8 +114,8 @@ Expected:
 3. Run:
 
 ```bash
-pnpm run vault -- balance box1 --passphrase "my passphrase"
-pnpm run vault -- balance box1 --token USDC --passphrase "my passphrase"
+pnpm run luckybox -- balance box1 --passphrase "my passphrase"
+pnpm run luckybox -- balance box1 --token USDC --passphrase "my passphrase"
 ```
 
 Expected:

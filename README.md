@@ -11,7 +11,7 @@ Recovery standard:
 ## Scripts
 
 - `pnpm run dev` (watch build + Node watch runtime)
-- `pnpm run vault -- --help`
+- `pnpm run luckybox -- --help`
 - `pnpm test`
 - `pnpm run test:integration`
 - `pnpm run test:e2e`
@@ -20,12 +20,23 @@ Recovery standard:
 - `pnpm run lint`
 - `pnpm run format:check`
 
+## Install
+
+```bash
+npm install -g luckybox
+luckybox --help
+```
+
+Migration note:
+
+- The legacy `vault` command name was removed. Use `luckybox` (global install) or `pnpm run luckybox -- ...` (repo-local).
+
 ## Interactive Shell
 
 Run shell mode:
 
 ```bash
-pnpm run vault -- shell
+pnpm run luckybox -- shell
 ```
 
 Shell setup flow:
@@ -65,3 +76,4 @@ No passphrase/private key/session secret is stored in `config.json`.
 
 - Development: `docs/guides/development-guide.md`
 - Usage: `docs/guides/usage-guide.md`
+- Release: `docs/guides/release-guide.md`

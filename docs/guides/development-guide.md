@@ -15,13 +15,13 @@ pnpm install
 
 ```bash
 pnpm run build
-pnpm run vault -- --help
+pnpm run luckybox -- --help
 ```
 
 Run interactive shell:
 
 ```bash
-pnpm run vault -- shell
+pnpm run luckybox -- shell
 ```
 
 ## Quality Gates
@@ -70,7 +70,7 @@ pnpm run test:e2e:scenario
 
 ## Notes
 
-- `vault shell` stores passphrase in runtime memory only for the process lifetime.
+- `luckybox shell` stores passphrase in runtime memory only for the process lifetime.
 - `config.json` stores only non-sensitive data per network:
   : `rpcs[]`, `tokens[]` (`address`, `symbol`, `decimals` as string).
 - Some mock tokens are non-standard and may reject transfer paths between wallets.

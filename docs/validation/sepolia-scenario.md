@@ -19,8 +19,8 @@ Note: replace token addresses with the contracts you actually intend to test.
 ## 2) Determinism + Privacy Checks
 
 ```bash
-pnpm run vault -- list --passphrase "my test passphrase"
-pnpm run vault -- list --passphrase "my test passphrase"
+pnpm run luckybox -- list --passphrase "my test passphrase"
+pnpm run luckybox -- list --passphrase "my test passphrase"
 ```
 
 Expected:
@@ -32,9 +32,9 @@ Expected:
 ## 3) Address Commands
 
 ```bash
-pnpm run vault -- address box1 --passphrase "my test passphrase"
-pnpm run vault -- address box1 --show --passphrase "my test passphrase"
-pnpm run vault -- address box1 --copy --passphrase "my test passphrase"
+pnpm run luckybox -- address box1 --passphrase "my test passphrase"
+pnpm run luckybox -- address box1 --show --passphrase "my test passphrase"
+pnpm run luckybox -- address box1 --copy --passphrase "my test passphrase"
 ```
 
 Expected:
@@ -52,13 +52,13 @@ Fund `box1` address with Sepolia ETH from a faucet.
 Native:
 
 ```bash
-pnpm run vault -- balance box1 --passphrase "my test passphrase"
+pnpm run luckybox -- balance box1 --passphrase "my test passphrase"
 ```
 
 ERC20 by symbol (from `.env`):
 
 ```bash
-pnpm run vault -- balance box1 --token USDC --passphrase "my test passphrase"
+pnpm run luckybox -- balance box1 --token USDC --passphrase "my test passphrase"
 ```
 
 Expected:
@@ -72,13 +72,13 @@ Expected:
 Native transfer:
 
 ```bash
-pnpm run vault -- send box1 --to 0xRECEIVER --amount 0.001 --passphrase "my test passphrase"
+pnpm run luckybox -- send box1 --to 0xRECEIVER --amount 0.001 --passphrase "my test passphrase"
 ```
 
 ERC20 transfer:
 
 ```bash
-pnpm run vault -- send box1 --to 0xRECEIVER --amount 1 --token USDC --passphrase "my test passphrase"
+pnpm run luckybox -- send box1 --to 0xRECEIVER --amount 1 --token USDC --passphrase "my test passphrase"
 ```
 
 Expected:
