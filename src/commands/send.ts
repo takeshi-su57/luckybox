@@ -18,7 +18,7 @@ export async function runSendCommand(options: {
 }): Promise<void> {
   if (!options.box) {
     throw new Error(
-      "Missing wallet alias. Usage: vault send box1 --to <address> --amount <value> [--token <symbol|address>] [--rpc-url <url>]"
+      "Missing wallet alias. Usage: luckybox send box1 --to <address> --amount <value> [--token <symbol|address>] [--rpc-url <url>]"
     );
   }
   if (!options.to) {

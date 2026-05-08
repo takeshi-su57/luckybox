@@ -10,7 +10,7 @@ export async function runAddressCommand(options: {
   passphrase?: string;
 }): Promise<void> {
   if (!options.box) {
-    throw new Error("Missing wallet alias. Usage: vault address box1 [--show] [--copy]");
+    throw new Error("Missing wallet alias. Usage: luckybox address box1 [--show] [--copy]");
   }
 
   const passphrase = await readPassphrase({ passphrase: options.passphrase });

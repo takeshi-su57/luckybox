@@ -42,7 +42,7 @@ export async function runBalanceCommand(options: {
   rpcUrl?: string;
 }): Promise<void> {
   if (!options.box) {
-    throw new Error("Missing wallet alias. Usage: vault balance box1 [--rpc-url <url>]");
+    throw new Error("Missing wallet alias. Usage: luckybox balance box1 [--rpc-url <url>]");
   }
 
   const passphrase = await readPassphrase({ passphrase: options.passphrase });

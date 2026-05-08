@@ -183,8 +183,29 @@ describe("deterministic key and CLI behavior", () => {
     expect(logs[0]).toMatch(/^box1: 0x.{3}\.\.\..{5}$/i);
   });
 
-  it("runBalanceCommand validates required alias argument", async () => {
-    await expect(runBalanceCommand({ box: "" })).rejects.toThrow(/Missing wallet alias/);
+  it("runAddressCommand missing alias usage references luckybox", async () => {
+    await expect(runAddressCommand({ box: "" })).rejects.toThrow(
+      "Missing wallet alias. Usage: luckybox address box1 [--show] [--copy]"
+    );
+  });
+
+  it("runBalanceCommand missing alias usage references luckybox", async () => {
+    await expect(runBalanceCommand({ box: "" })).rejects.toThrow(
+      "Missing wallet alias. Usage: luckybox balance box1 [--rpc-url <url>]"
+    );
+  });
+
+  it("runSendCommand missing alias usage references luckybox", async () => {
+    await expect(
+      runSendCommand({
+        box: "",
+        to: "0x0000000000000000000000000000000000000001",
+        amount: "1",
+        passphrase: "unit test passphrase"
+      })
+    ).rejects.toThrow(
+      "Missing wallet alias. Usage: luckybox send box1 --to <address> --amount <value> [--token <symbol|address>] [--rpc-url <url>]"
+    );
   });
 
   it("runSendCommand validates required amount option", async () => {

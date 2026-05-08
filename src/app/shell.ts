@@ -325,7 +325,7 @@ export async function executeShellSession(deps: ShellDeps): Promise<void> {
 
   try {
     while (true) {
-      const raw = await deps.promptLine("vault> ");
+      const raw = await deps.promptLine("luckybox> ");
       const parsed = parseShellInput(raw);
       if (!parsed) continue;
       const { command, args } = parsed;

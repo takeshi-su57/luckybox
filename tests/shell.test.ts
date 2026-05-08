@@ -125,11 +125,15 @@ describe("interactive shell", () => {
     ];
     let i = 0;
     const logs: string[] = [];
+    const promptLabels: string[] = [];
     const readPassphrase = vi.fn(async () => "secret");
 
     await executeShellSession({
       readPassphrase,
-      promptLine: async () => prompts[i++] ?? "exit",
+      promptLine: async (prompt) => {
+        promptLabels.push(prompt);
+        return prompts[i++] ?? "exit";
+      },
       log: (line) => logs.push(line)
     });
 
@@ -147,6 +151,7 @@ describe("interactive shell", () => {
     );
     expect(addTokenMock).toHaveBeenCalled();
     expect(resolveRpcUrlMock).toHaveBeenCalledWith(undefined, "sepolia");
+    expect(promptLabels).toContain("luckybox> ");
   });
 
   it("rejects token send when setup asset is native", async () => {
