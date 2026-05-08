@@ -26,7 +26,12 @@ describe("release workflow contracts", () => {
 
     expect(releaseWorkflow).toMatch(/\bpush:\s*[\r\n]+\s*branches:\s*[\r\n]+\s*-\s*main\b/m);
     expect(releaseWorkflow).toContain("if: github.ref == 'refs/heads/main'");
+    expect(releaseWorkflow).toContain("concurrency:");
+    expect(releaseWorkflow).toMatch(/\bpermissions:\s*[\r\n]+\s*contents:\s*write\b/m);
+    expect(releaseWorkflow).toMatch(/\bpermissions:\s*[\r\n]+\s*contents:\s*write\s*[\r\n]+\s*pull-requests:\s*write\b/m);
     expect(releaseWorkflow).toContain("changesets/action@v1");
+    expect(releaseWorkflow).toContain("publish: pnpm run release:publish");
     expect(releaseWorkflow).toContain("NPM_TOKEN");
+    expect(releaseWorkflow).toMatch(/\bpnpm run typecheck\b|\bpnpm run lint\b|\bpnpm test\b|\bpnpm run build\b/);
   });
 });
