@@ -12,6 +12,7 @@ import { runBalanceCommand } from "../src/commands/balance";
 import { runSendCommand } from "../src/commands/send";
 import { deriveSeed } from "../src/crypto/kdf";
 import { deriveAddress, getDerivationPath } from "../src/crypto/hd";
+import { resolveRpcUrl } from "../src/config/rpc";
 import {
   boxToIndex,
   deriveDefaultWallets,
@@ -239,6 +240,11 @@ describe("deterministic key and CLI behavior", () => {
         passphrase: "unit test passphrase"
       })
     ).rejects.toThrow(/Invalid amount/);
+  });
+
+  it("resolveRpcUrl does not fall back to ETH_RPC_URL for non-shell usage", () => {
+    process.env.ETH_RPC_URL = "https://legacy-env.example";
+    expect(() => resolveRpcUrl()).toThrow(/Provide --rpc-url/);
   });
 
   it("getVaultConfig rejects whitespace-only BRAIN_WALLET_SALT", () => {

@@ -43,7 +43,7 @@ Standard reference:
 
 - Language: TypeScript
 - Runtime target: Node.js (ESM build output in `dist/`)
-- CLI parser: `commander`
+- CLI parser: `@oclif/core`
 - Chain/client lib: `viem`
 - Package manager: `pnpm` (required)
 
@@ -58,11 +58,15 @@ Standard reference:
 
 ## Repo Map
 
-- `src/cli/`: CLI entrypoints and command handlers
+- `src/commands/`: CLI commands (`address`, `balance`, `send`, `shell`, etc.)
+- `src/app/`: shell/session workflows and shared app-level logic
 - `src/crypto/`: KDF + HD derivation helpers
-- `src/config/`: env parsing and supported-chain mapping
+- `src/config/`: env parsing, supported-chain mapping, local config persistence
+- `src/io/`: hidden prompt and clipboard helpers
 - `src/wallet/`: deterministic derivation domain logic + standard constants
-- `tests/run.ts`: deterministic and CLI unit test harness
+- `tests/run.test.ts`: unit test suite (Vitest)
+- `tests/integration/`: read-only testnet integration tests
+- `tests/e2e/`: live testnet scenario tests
 - `docs/standards/`: public-standard based derivation spec
 - `docs/testing/`: test strategy and validation scenarios
 

@@ -92,7 +92,7 @@ export default class Balance extends Command {
       description: "Passphrase (or use BRAIN_PASSPHRASE env var)."
     }),
     "rpc-url": Flags.string({
-      description: "RPC endpoint (or use ETH_RPC_URL env var)."
+      description: "RPC endpoint."
     }),
     token: Flags.string({
       description: "ERC20 symbol from env or token contract address."

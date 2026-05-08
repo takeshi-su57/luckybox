@@ -53,7 +53,7 @@ beforeEach(() => {
 
 maybeDescribe("Sepolia live send e2e", () => {
   it("sends a small native transfer from box1 to box2", async () => {
-    requireEnv("ETH_RPC_URL");
+    const rpcUrl = requireEnv("ETH_RPC_URL");
     requireEnv("BRAIN_PASSPHRASE");
 
     const logs: string[] = [];
@@ -67,7 +67,8 @@ maybeDescribe("Sepolia live send e2e", () => {
         box: "box1",
         to: requireEnv("TEST_RECIPIENT_ADDRESS"),
         amount: getNativeSendAmount(),
-        passphrase: process.env.BRAIN_PASSPHRASE
+        passphrase: process.env.BRAIN_PASSPHRASE,
+        rpcUrl
       });
     } finally {
       console.log = originalLog;
@@ -77,7 +78,7 @@ maybeDescribe("Sepolia live send e2e", () => {
   }, 60_000);
 
   it("sends a small ERC20 transfer from box1 to recipient", async () => {
-    requireEnv("ETH_RPC_URL");
+    const rpcUrl = requireEnv("ETH_RPC_URL");
     requireEnv("BRAIN_PASSPHRASE");
     requireEnv("VAULT_ERC20_TOKENS");
 
@@ -93,7 +94,8 @@ maybeDescribe("Sepolia live send e2e", () => {
         to: requireEnv("TEST_RECIPIENT_ADDRESS"),
         token: getTestTokenSymbol(),
         amount: getErc20SendAmount(),
-        passphrase: process.env.BRAIN_PASSPHRASE
+        passphrase: process.env.BRAIN_PASSPHRASE,
+        rpcUrl
       });
     } finally {
       console.log = originalLog;

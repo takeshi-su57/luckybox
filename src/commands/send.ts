@@ -135,7 +135,7 @@ export default class Send extends Command {
       description: "Passphrase (or use BRAIN_PASSPHRASE env var)."
     }),
     "rpc-url": Flags.string({
-      description: "RPC endpoint (or use ETH_RPC_URL env var)."
+      description: "RPC endpoint."
     }),
     to: Flags.string({
       required: true,

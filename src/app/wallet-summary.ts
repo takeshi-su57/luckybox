@@ -1,11 +1,10 @@
-import type { Command } from "@oclif/core";
 import { getVaultConfig } from "../config/env";
+import { readPassphrase } from "../io/prompt";
 import { deriveDefaultWallets, formatPartialAddress } from "../wallet/derive";
 import { KEY_STANDARD_NAME } from "../wallet/standard";
-import { readPassphrase } from "../io/prompt";
 
 export async function printDefaultWallets(options: {
-  command: Command;
+  command: { log: (line: string) => void };
   passphrase?: string;
   confirmPassphrase?: boolean;
   showFullAddress?: boolean;

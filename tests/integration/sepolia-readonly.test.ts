@@ -60,7 +60,7 @@ maybeDescribe("Sepolia read-only integration", () => {
   });
 
   it("reads native balance for box1 on sepolia", async () => {
-    requireEnv("ETH_RPC_URL");
+    const rpcUrl = requireEnv("ETH_RPC_URL");
     requireEnv("BRAIN_PASSPHRASE");
     process.env.VAULT_NETWORK = "sepolia";
 
@@ -73,7 +73,8 @@ maybeDescribe("Sepolia read-only integration", () => {
     try {
       await runBalanceCommand({
         box: "box1",
-        passphrase: process.env.BRAIN_PASSPHRASE
+        passphrase: process.env.BRAIN_PASSPHRASE,
+        rpcUrl
       });
     } finally {
       console.log = originalLog;
@@ -84,7 +85,7 @@ maybeDescribe("Sepolia read-only integration", () => {
   }, 30_000);
 
   it("reads ERC20 balance for box1 on sepolia", async () => {
-    requireEnv("ETH_RPC_URL");
+    const rpcUrl = requireEnv("ETH_RPC_URL");
     requireEnv("BRAIN_PASSPHRASE");
     requireEnv("VAULT_ERC20_TOKENS");
     process.env.VAULT_NETWORK = "sepolia";
@@ -100,7 +101,8 @@ maybeDescribe("Sepolia read-only integration", () => {
       await runBalanceCommand({
         box: "box1",
         token: tokenSymbol,
-        passphrase: process.env.BRAIN_PASSPHRASE
+        passphrase: process.env.BRAIN_PASSPHRASE,
+        rpcUrl
       });
     } finally {
       console.log = originalLog;

@@ -1,11 +1,20 @@
-import process from "node:process";
+import type { SupportedNetwork } from "./chains";
 
-export function resolveRpcUrl(rpcUrlOverride?: string): string {
-  const rpcUrl = rpcUrlOverride ?? process.env.ETH_RPC_URL;
-  if (!rpcUrl) {
-    throw new Error(
-      "Missing RPC URL. Provide --rpc-url <url> or set ETH_RPC_URL in your environment."
-    );
+const DEFAULT_RPC_URLS: Record<SupportedNetwork, string> = {
+  ethereum: "https://ethereum-rpc.publicnode.com",
+  arbitrum: "https://arbitrum-one-rpc.publicnode.com",
+  sepolia: "https://ethereum-sepolia-rpc.publicnode.com",
+  base: "https://base-rpc.publicnode.com",
+  polygon: "https://polygon-bor-rpc.publicnode.com"
+};
+
+export function resolveRpcUrl(rpcUrlOverride?: string, network?: SupportedNetwork): string {
+  const normalizedOverride = rpcUrlOverride?.trim();
+  if (normalizedOverride) return normalizedOverride;
+
+  if (network) {
+    return DEFAULT_RPC_URLS[network];
   }
-  return rpcUrl;
+
+  throw new Error("Missing RPC URL. Provide --rpc-url <url>.");
 }

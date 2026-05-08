@@ -1,5 +1,5 @@
 import { Command, Flags } from "@oclif/core";
-import { printDefaultWallets } from "./wallet-summary";
+import { printDefaultWallets } from "../app/wallet-summary";
 
 export default class Init extends Command {
   static override summary = "Initialize deterministic keys for this session (no persistence).";

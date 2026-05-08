@@ -1,5 +1,5 @@
 import { Command, Flags } from "@oclif/core";
-import { printDefaultWallets } from "./wallet-summary";
+import { printDefaultWallets } from "../app/wallet-summary";
 
 export default class List extends Command {
   static override summary = "List box1 and box2 addresses (masked by default).";

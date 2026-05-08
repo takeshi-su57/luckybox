@@ -16,7 +16,12 @@ import process from "node:process";
 import { runSendCommand } from "../../src/commands/send";
 import { deriveWalletByBox } from "../../src/wallet/derive";
 import { resolveErc20Address } from "../../src/config/env";
-import { getTestTokenSymbol, hasEnv, requireEnv } from "../testnet/helpers";
+import {
+  getTestTokenSymbol,
+  hasConfiguredTokenSymbol,
+  hasEnv,
+  requireEnv
+} from "../testnet/helpers";
 
 loadDotEnv({ path: process.env.TEST_ENV_FILE || ".env.testnet", override: false, quiet: true });
 
@@ -99,6 +104,7 @@ async function runCliSendAndWait(options: {
     amount: string;
     token?: string;
     passphrase: string;
+    rpcUrl?: string;
   };
 }): Promise<`0x${string}`> {
   const { publicClient, runOptions } = options;
@@ -110,7 +116,10 @@ async function runCliSendAndWait(options: {
   };
 
   try {
-    await runSendCommand(runOptions);
+    await runSendCommand({
+      ...runOptions,
+      rpcUrl: runOptions.rpcUrl ?? requireEnv("ETH_RPC_URL")
+    });
   } finally {
     console.log = originalLog;
   }
@@ -193,7 +202,7 @@ async function getSafeNativeReturnAmount(options: {
   const { publicClient, address, desiredWei } = options;
   const [balance, feePreview] = await Promise.all([
     publicClient.getBalance({ address }),
-    publicClient.estimateFeesPerGas({ type: "eip1559" })
+    publicClient.estimateFeesPerGas({ chain: sepolia, type: "eip1559" })
   ]);
 
   const maxFeePerGas = feePreview.maxFeePerGas ?? 0n;
@@ -270,7 +279,7 @@ const scenarioReady =
   hasEnv("ETH_RPC_URL") &&
   hasEnv("BRAIN_WALLET_SALT") &&
   hasEnv("BRAIN_PASSPHRASE") &&
-  hasEnv("VAULT_ERC20_TOKENS") &&
+  hasConfiguredTokenSymbol(getTestTokenSymbol()) &&
   hasEnv("TEST_EXTERNAL_PRIVATE_KEY") &&
   hasEnv("TEST_EXTERNAL_ADDRESS");
 
