@@ -185,6 +185,7 @@ describe("deterministic key and CLI behavior", () => {
   });
 
   it("runAddressCommand prints masked address by default", async () => {
+    process.env.BRAIN_WALLET_SALT = "test:salt:v1";
     const logs: string[] = [];
     const originalLog = console.log;
     console.log = (...args: unknown[]) => {

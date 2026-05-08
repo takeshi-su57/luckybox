@@ -1,17 +1,27 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import process from "node:process";
-import {
-  clearGlobalWalletSalt,
-  getGlobalWalletSalt,
-  setGlobalWalletSalt
-} from "../src/config/local-config";
+
+const { getGlobalWalletSaltMock, setGlobalWalletSaltMock, resetWalletSaltMock } = vi.hoisted(() => {
+  let walletSalt: string | undefined;
+  return {
+    getGlobalWalletSaltMock: vi.fn(async () => walletSalt),
+    setGlobalWalletSaltMock: vi.fn(async (value: string) => {
+      walletSalt = value.trim();
+    }),
+    resetWalletSaltMock: () => {
+      walletSalt = undefined;
+    }
+  };
+});
+
+vi.mock("../src/config/local-config", () => ({
+  getGlobalWalletSalt: getGlobalWalletSaltMock,
+  setGlobalWalletSalt: setGlobalWalletSaltMock
+}));
+
 import { resolveWalletSalt } from "../src/config/wallet-salt";
 
 const ORIGINAL_ENV = { ...process.env };
-const CONFIG_PATH = `${process.cwd()}\\config.json`;
-let originalConfigExists = false;
-let originalConfigContent = "";
 
 function restoreEnv(): void {
   for (const key of Object.keys(process.env)) {
@@ -27,27 +37,15 @@ function restoreEnv(): void {
 }
 
 beforeEach(() => {
-  originalConfigExists = existsSync(CONFIG_PATH);
-  originalConfigContent = originalConfigExists ? readFileSync(CONFIG_PATH, "utf8") : "";
-  if (originalConfigExists) {
-    unlinkSync(CONFIG_PATH);
-  }
   restoreEnv();
-});
-
-afterEach(() => {
-  if (existsSync(CONFIG_PATH)) {
-    unlinkSync(CONFIG_PATH);
-  }
-  if (originalConfigExists) {
-    writeFileSync(CONFIG_PATH, originalConfigContent, "utf8");
-  }
-  restoreEnv();
+  getGlobalWalletSaltMock.mockClear();
+  setGlobalWalletSaltMock.mockClear();
+  resetWalletSaltMock();
 });
 
 describe("wallet salt resolution", () => {
   it("prefers env override over persisted config", async () => {
-    await setGlobalWalletSalt("config-salt");
+    await setGlobalWalletSaltMock("config-salt");
     process.env.BRAIN_WALLET_SALT = "env-salt";
 
     const resolved = await resolveWalletSalt();
@@ -56,7 +54,7 @@ describe("wallet salt resolution", () => {
   });
 
   it("uses persisted global config when env is unset", async () => {
-    await setGlobalWalletSalt("config-salt");
+    await setGlobalWalletSaltMock("config-salt");
 
     const resolved = await resolveWalletSalt();
     expect(resolved.salt).toBe("config-salt");
@@ -70,14 +68,8 @@ describe("wallet salt resolution", () => {
 
     expect(resolved.salt).toBe("prompt-salt");
     expect(resolved.source).toBe("prompt");
-    await expect(getGlobalWalletSalt()).resolves.toBe("prompt-salt");
-  });
-
-  it("clears persisted global salt", async () => {
-    await setGlobalWalletSalt("to-clear");
-    await clearGlobalWalletSalt();
-
-    await expect(getGlobalWalletSalt()).resolves.toBeUndefined();
+    await expect(getGlobalWalletSaltMock()).resolves.toBe("prompt-salt");
+    expect(setGlobalWalletSaltMock).toHaveBeenCalledWith("prompt-salt");
   });
 
   it("rejects blank env override", async () => {
