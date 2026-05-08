@@ -19,4 +19,24 @@ describe("vitest config", () => {
     expect(packageJson.scripts?.["test:integration"] ?? "").toContain("--exclude dist/**");
     expect(packageJson.scripts?.["test:e2e"] ?? "").toContain("--exclude dist/**");
   });
+
+  it("enforces publish metadata and luckybox cli entrypoint contract", () => {
+    const packageJsonPath = path.resolve(process.cwd(), "package.json");
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8")) as {
+      private?: boolean;
+      version?: string;
+      bin?: Record<string, string>;
+      oclif?: { bin?: string };
+      scripts?: Record<string, string>;
+      files?: string[];
+    };
+
+    expect(packageJson.private).toBe(false);
+    expect(packageJson.version).toBe("0.1.1");
+    expect(packageJson.bin).toEqual({ luckybox: "./bin/run.js" });
+    expect(packageJson.oclif?.bin).toBe("luckybox");
+    expect(packageJson.scripts?.luckybox ?? "").toContain("node ./bin/run.js");
+    expect(packageJson.scripts?.vault).toBeUndefined();
+    expect(packageJson.files).toEqual(["bin", "dist", "README.md"]);
+  });
 });

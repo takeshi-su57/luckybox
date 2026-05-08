@@ -1,13 +1,13 @@
 {
   "name": "luckybox",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.1.1",
+  "private": false,
   "packageManager": "pnpm@9.15.4",
   "bin": {
-    "vault": "./bin/run.js"
+    "luckybox": "./bin/run.js"
   },
   "oclif": {
-    "bin": "vault",
+    "bin": "luckybox",
     "commands": "./dist/src/commands"
   },
   "scripts": {
@@ -15,7 +15,7 @@
     "build": "pnpm -s run clean && tsc -p tsconfig.build.json",
     "build:watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
     "dev": "node ./bin/dev.js",
-    "vault": "pnpm -s run build && node ./bin/run.js",
+    "luckybox": "pnpm -s run build && node ./bin/run.js",
     "test": "vitest run --pool=threads tests --exclude dist/**",
     "test:watch": "vitest --pool=threads tests --exclude dist/**",
     "test:coverage": "vitest run --pool=threads --coverage tests --exclude dist/**",
@@ -28,6 +28,11 @@
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
+  "files": [
+    "bin",
+    "dist",
+    "README.md"
+  ],
   "dependencies": {
     "@oclif/core": "^4.11.1",
     "dotenv": "^17.4.2",
