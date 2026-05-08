@@ -17,7 +17,7 @@
     "dev": "node ./bin/dev.js",
     "luckybox": "pnpm -s run build && node ./bin/run.js",
     "changeset": "changeset",
-    "release:check": "pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test && pnpm run build && pnpm pack --dry-run",
+    "release:check": "pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test && pnpm run build && npm pack --dry-run",
     "release:publish": "changeset publish",
     "prepublishOnly": "pnpm run release:check",
     "test": "vitest run --pool=threads tests --exclude dist/**",

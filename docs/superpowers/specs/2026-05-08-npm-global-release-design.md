@@ -9,6 +9,7 @@
 Make the `luckybox` CLI production-ready for global npm installation and controlled releases.
 
 Primary outcomes:
+
 - Users can install globally with `npm install -g luckybox` and run `luckybox` directly.
 - Releases are versioned and published through a main-branch-only GitHub CI/CD pipeline.
 - First production publish target is `0.1.1`.
@@ -16,6 +17,7 @@ Primary outcomes:
 ## 2. Scope
 
 In scope:
+
 - Package metadata and CLI command contract updates for npm distribution.
 - Main-only GitHub Actions CI workflow.
 - Changesets-based release workflow that opens release PRs and publishes from `main`.
@@ -23,6 +25,7 @@ In scope:
 - Release safeguards and maintainer documentation updates.
 
 Out of scope:
+
 - Any wallet derivation or cryptographic behavior change.
 - Adding dual command aliases (`vault` + `luckybox`).
 - Multi-registry publishing.
@@ -42,12 +45,14 @@ Out of scope:
 Component: `package.json` publish/CLI metadata.
 
 Responsibilities:
+
 - Enable publishing (`private: false`).
 - Expose only `luckybox` command through `bin`.
 - Set version baseline for first release (`0.1.1`).
 - Provide complete npm metadata and controlled file inclusion.
 
 Interface:
+
 - Install command: `npm install -g luckybox`.
 - Runtime command: `luckybox`.
 
@@ -56,6 +61,7 @@ Interface:
 Component: `.github/workflows/ci.yml`.
 
 Responsibilities:
+
 - Validate quality gates on PRs and pushes to `main`:
   - typecheck
   - lint
@@ -64,6 +70,7 @@ Responsibilities:
   - build
 
 Interface:
+
 - GitHub check runs attached to PR and `main` commits.
 
 ### 4.3 Release Orchestration Layer
@@ -71,11 +78,13 @@ Interface:
 Component: `.github/workflows/release.yml` powered by Changesets.
 
 Responsibilities:
+
 - Trigger only on `main` push.
 - Open/update release PR when unreleased changesets exist.
 - Publish to npm when release commit lands on `main`.
 
 Security/Control:
+
 - Requires `NPM_TOKEN` repository secret.
 - Workflow permissions constrained to release tasks.
 - Defense-in-depth guard on branch ref before publish step.
@@ -85,6 +94,7 @@ Security/Control:
 Components: README + release runbook docs.
 
 Responsibilities:
+
 - Document install/usage contract (`luckybox`, no `vault`).
 - Document release mechanics and incident handling.
 
@@ -117,37 +127,45 @@ Responsibilities:
 ### 6.1 npm Name/Ownership Conflict
 
 Risk:
+
 - Publish fails if package name ownership is not valid at publish time.
 
 Handling:
+
 - Preflight `npm view luckybox` check prior to first publish.
 - If conflict appears unexpectedly, stop publish and migrate to scoped fallback design in a follow-up spec.
 
 ### 6.2 Missing or Invalid NPM_TOKEN
 
 Risk:
+
 - Publish job fails authentication.
 
 Handling:
+
 - Release workflow fails fast with explicit error.
 - Runbook includes secret setup/rotation steps.
 
 ### 6.3 Broken Packaged Artifact
 
 Risk:
+
 - Published package missing required runtime files.
 
 Handling:
-- Enforce `pnpm pack --dry-run` in release checks.
+
+- Enforce `npm pack --dry-run` in release checks.
 - Maintain explicit package `files` allowlist.
 - Keep `prepublishOnly` gate to build/test before publish.
 
 ### 6.4 Command Break for Existing `vault` Users
 
 Risk:
+
 - Existing users invoking `vault` fail after upgrade.
 
 Handling:
+
 - Changelog and README include explicit migration note:
   - `vault` removed.
   - use `luckybox`.
@@ -165,16 +183,18 @@ Handling:
 
 ### 7.2 Packaging Verification
 
-- `pnpm pack --dry-run` to verify publish contents.
+- `npm pack --dry-run` to verify publish contents.
 - Validate executable entrypoint is included and callable.
 
 ### 7.3 Post-Publish Smoke Verification
 
 On clean environment after first release:
+
 - `npm install -g luckybox@0.1.1`
 - `luckybox --help`
 
 Expected result:
+
 - command resolves globally
 - help output renders without runtime errors
 
@@ -208,6 +228,7 @@ Expected result:
 ## 11. Maintainer Runbook Requirements
 
 Documentation must include:
+
 - Required repository secret: `NPM_TOKEN`.
 - Release PR lifecycle with Changesets.
 - How to handle failed publish and retry safely.
