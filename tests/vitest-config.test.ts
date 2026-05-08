@@ -16,6 +16,9 @@ describe("vitest config", () => {
     expect(packageJson.scripts?.test ?? "").toContain("--exclude dist/**");
     expect(packageJson.scripts?.["test:watch"] ?? "").toContain("--exclude dist/**");
     expect(packageJson.scripts?.["test:coverage"] ?? "").toContain("--exclude dist/**");
+    expect(packageJson.scripts?.test ?? "").toContain("--exclude tests/e2e/**");
+    expect(packageJson.scripts?.["test:watch"] ?? "").toContain("--exclude tests/e2e/**");
+    expect(packageJson.scripts?.["test:coverage"] ?? "").toContain("--exclude tests/e2e/**");
     expect(packageJson.scripts?.["test:integration"] ?? "").toContain("--exclude dist/**");
     expect(packageJson.scripts?.["test:e2e"] ?? "").toContain("--exclude dist/**");
   });
